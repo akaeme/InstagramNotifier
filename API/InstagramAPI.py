@@ -1,13 +1,15 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import requests
-import json
 import hashlib
 import hmac
+import json
+import time
 import urllib
 import uuid
-import time
+
+import requests
 from requests_toolbelt import MultipartEncoder
+
 
 class InstagramAPI:
     API_URL = 'https://i.instagram.com/api/v1/'
@@ -72,8 +74,11 @@ class InstagramAPI:
                     self.timelineFeed()
                     self.getv2Inbox()
                     self.getRecentActivity()
-                    print ("Login success!\n")
-                    return True;
+                    # print ("Login success!\n")
+                    # print(self.username_id)
+                    return True
+                # Added
+                return False
 
     def syncFeatures(self):
         data = json.dumps({
@@ -373,13 +378,15 @@ class InstagramAPI:
         return self.SendRequest('friendships/'+ str(usernameId) +'/following/?max_id='+ str(maxid)
             +'&ig_sig_key_version='+ self.SIG_KEY_VERSION +'&rank_token='+ self.rank_token)
 
-    def getSelfUsersFollowing(self):
-        return self.getUserFollowings(self.username_id)
+    # Added maxid=''
+    def getSelfUsersFollowing(self, maxid=''):
+        return self.getUserFollowings(self.username_id, maxid=maxid)
 
     def getUserFollowers(self, usernameId, maxid = ''):
         return self.SendRequest('friendships/'+ str(usernameId) +'/followers/?max_id='+ str(maxid)
             +'&ig_sig_key_version='+ self.SIG_KEY_VERSION +'&rank_token='+ self.rank_token)
 
+    # Added maxid=''
     def getSelfUserFollowers(self, maxid=''):
         return self.getUserFollowers(self.username_id, maxid=maxid)
 
@@ -499,7 +506,7 @@ class InstagramAPI:
     def SendRequest(self, endpoint, post = None, login = False):
         if (not self.isLoggedIn and not login):
             raise Exception("Not logged in!\n")
-            return;
+            return
 
         self.s.headers.update ({'Connection' : 'close',
                                 'Accept' : '*/*',
@@ -517,6 +524,8 @@ class InstagramAPI:
             self.LastResponse = response
             self.LastJson = json.loads(response.text)
             return True
+        if response.status_code == 429:
+            pass
         else:
             print ("Request return " + str(response.status_code) + " error!")
             # for debugging
