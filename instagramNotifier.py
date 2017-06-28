@@ -68,6 +68,7 @@ def alert(user, follow, data, client_fb):
                 message = get_message(message_type='image', source=follow, data=data)
                 client_fb.sendLocalImage(image_path='tmp.jpg', message=message, thread_id=str(user['thread_id']))
                 client_fb.sendMessage(message=MESSAGE_FOOTER, thread_id=str(user['thread_id']))
+                # clean image created
                 os.remove('tmp.jpg')
             else:
                 message = get_message(message_type='no_image', source=follow)
@@ -203,3 +204,4 @@ if __name__ == "__main__":
             # flag will be always True
             flag, api = login(user_=username, passw=password)
             run(api_=api, user_=username)
+            print('Over')
