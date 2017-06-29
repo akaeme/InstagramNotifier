@@ -126,12 +126,13 @@ def validate_user(user_, passw, service):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Instagram Notifier. it get new post from user that we want to follow closely.')
+        description='Instagram Notifier. It get new posts from user that we want to follow closely and notify other '
+                    'users on facebook messenger')
     parser.add_argument('-u', action="store_true", dest='user', help='Add a valid user to the database.')
     parser.add_argument('-f', action="store_true", dest='follow', help='Add someone to follow closely.')
-    parser.add_argument('-n', action="store_true", dest='notify', help='Add someone to notify on facebook messenger.')
+    parser.add_argument('-n', action="store_true", dest='notify', help='Add someone to get notified on facebook '
+                                                                       'messenger.')
     parser.add_argument('-r', action="store_true", dest='run', help='Run Instagram Notifier.')
-    parser.add_argument('-fb', action="store_true", dest='fb', help='Facebook Test')
     args = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
@@ -204,4 +205,3 @@ if __name__ == "__main__":
             # flag will be always True
             flag, api = login(user_=username, passw=password)
             run(api_=api, user_=username)
-            print('Over')
