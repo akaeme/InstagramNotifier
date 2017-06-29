@@ -71,6 +71,16 @@ class Database:
                                                                                              width, height, location))
         self.connection.commit()
 
+    def update_media(self, last_media_id, media_count, foreign_id, last_media, width, height, location, last_media_id_):
+        self.connection.execute("UPDATE Media SET last_media_id=?, media_count=?, foreign_id=?, last_media=?, width=?, "
+                                "height=?, location=? WHERE id=? AND last_media_id=?;", (last_media_id,
+                                                                                         media_count,
+                                                                                         foreign_id,
+                                                                                         last_media,
+                                                                                         width, height, location,
+                                                                                         foreign_id, last_media_id_))
+        self.connection.commit()
+
     def insert_notify(self, foreign_id, thread_id, thread_type, image_flag):
         # thread_type 0 - User
         # thread_type 1 - group
@@ -98,7 +108,8 @@ class Database:
 
     def get_from_follows(self, username):
         try:
-            self.cursor = self.connection.execute("SELECT user_id, username FROM Follow WHERE user = ?;", (username,))
+            self.cursor = self.connection.execute("SELECT user_id, username, id FROM Follow WHERE "
+                                                  "user = ?;", (username,))
         except sqlite3.Error:
             pass
         results = self.cursor.fetchall()

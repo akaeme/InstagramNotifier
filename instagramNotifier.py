@@ -86,7 +86,7 @@ def run(api_, user_):
     email_fb = input('Facebook email: ')
     pass_fb = getpass(prompt='Facebook password: ')
     client_fb = Client(email=email_fb, password=pass_fb, logging_level=logging.CRITICAL)
-    for f_closely, username_follow in follows:
+    for f_closely, username_follow, id_ in follows:
         data = dict(last_media_id=0, media_count=0, user_id=0, last_media='', width=0, height=0, location='')
         data['user_id'] = f_closely
         api_.getUsernameInfo(str(f_closely))
@@ -107,9 +107,11 @@ def run(api_, user_):
         data_ = [media for media in medias if media['user_id'] == data['user_id']][0]
         if data['media_count'] > data_['media_count']:
             alert(user=user_, follow=username_follow, data=data, client_fb=client_fb)
-            database.insert_media(last_media_id=data['last_media_id'], media_count=data['media_count'],
-                                  foreign_id=id_row, last_media=data['last_media'], width=data['width'],
-                                  height=data['height'], location=data['location'])
+            # Update info on database
+            database.update_media(last_media_id=data['last_media_id'], media_count=data['media_count'],
+                                  foreign_id=id_, last_media=data['last_media'], width=data['width'],
+                                  height=data['height'],
+                                  location=data['location'], last_media_id_=data_['last_media_id'])
 
 
 def get_info(api_, user_id):
