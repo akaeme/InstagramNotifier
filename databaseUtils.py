@@ -57,9 +57,18 @@ class Database:
         self.connection.commit()
 
     def insert_follow(self, user_id, username, user, full_name='', is_private=False, profile_pic=''):
-        self.connection.execute("INSERT OR IGNORE INTO Follow VALUES (NULL,?,?,?,?,?,?);", (user_id, username,
-                                                                                            full_name, is_private,
-                                                                                            profile_pic, user))
+        self.cursor = self.connection.execute("INSERT OR IGNORE INTO Follow VALUES (NULL,?,?,?,?,?,?);",
+                                              (user_id, username, full_name, is_private, profile_pic, user))
+        id_row = self.cursor.lastrowid
+        self.connection.commit()
+        return id_row
+
+    def insert_media(self, last_media_id, media_count, foreign_id, last_media, width, height, location):
+        self.connection.execute("INSERT OR IGNORE INTO Media VALUES (Null,?,?,?,?,?,?,?);", (last_media_id,
+                                                                                             media_count,
+                                                                                             foreign_id,
+                                                                                             last_media,
+                                                                                             width, height, location))
         self.connection.commit()
 
     def insert_notify(self, foreign_id, thread_id, thread_type, image_flag):
