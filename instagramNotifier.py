@@ -107,9 +107,13 @@ def run(api_, user_):
         data_ = [media for media in medias if media['user_id'] == data['user_id']][0]
         if data['media_count'] > data_['media_count']:
             alert(user=user_, follow=username_follow, data=data, client_fb=client_fb)
+            database.insert_media(last_media_id=data['last_media_id'], media_count=data['media_count'],
+                                  foreign_id=id_row, last_media=data['last_media'], width=data['width'],
+                                  height=data['height'], location=data['location'])
 
 
 def get_info(api_, user_id):
+    """Save info of the follower"""
     data = dict(last_media_id=0, media_count=0, user_id=0, last_media='', width=0, height=0, location='')
     data['user_id'] = user_id
     api_.getUsernameInfo(user_id)
