@@ -3,6 +3,7 @@ import os
 import sys
 import urllib.request
 from getpass import getpass
+from time import sleep
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -81,37 +82,45 @@ def alert(user, follow, data, client_fb):
 
 def run(api_, user_):
     """Run bot"""
-    follows = database.get_from_follows(username=user_)
-    medias = database.get_from_media(username=user_)
     email_fb = input('Facebook email: ')
     pass_fb = getpass(prompt='Facebook password: ')
     client_fb = Client(email=email_fb, password=pass_fb, logging_level=logging.CRITICAL)
-    for f_closely, username_follow, id_ in follows:
-        data = dict(last_media_id=0, media_count=0, user_id=0, last_media='', width=0, height=0, location='')
-        data['user_id'] = f_closely
-        api_.getUsernameInfo(str(f_closely))
-        media_results = api_.LastJson
-        data['media_count'] = media_results['user']['media_count']
-        api_.getUserFeed(str(f_closely))
-        media_results = api_.LastJson
-        last_media = media_results['items'][0]
-        try:
-            data['last_media_id'] = int(last_media['pk'])
-            data['last_media'] = last_media['image_versions2']['candidates'][0]['url']
-            data['width'] = last_media['image_versions2']['candidates'][0]['width']
-            data['height'] = last_media['image_versions2']['candidates'][0]['height']
-            data['location'] = last_media['location']['name']
-        except KeyError:
-            # for debugging
-            print('KeyError')
-        data_ = [media for media in medias if media['user_id'] == data['user_id']][0]
-        if data['media_count'] > data_['media_count']:
-            alert(user=user_, follow=username_follow, data=data, client_fb=client_fb)
-            # Update info on database
-            database.update_media(last_media_id=data['last_media_id'], media_count=data['media_count'],
-                                  foreign_id=id_, last_media=data['last_media'], width=data['width'],
-                                  height=data['height'],
-                                  location=data['location'], last_media_id_=data_['last_media_id'])
+    try:
+        print('Running..')
+        while True:
+            follows = database.get_from_follows(username=user_)
+            medias = database.get_from_media(username=user_)
+
+            for f_closely, username_follow, id_ in follows:
+                data = dict(last_media_id=0, media_count=0, user_id=0, last_media='', width=0, height=0, location='')
+                data['user_id'] = f_closely
+                api_.getUsernameInfo(str(f_closely))
+                media_results = api_.LastJson
+                data['media_count'] = media_results['user']['media_count']
+                api_.getUserFeed(str(f_closely))
+                media_results = api_.LastJson
+                last_media = media_results['items'][0]
+                try:
+                    data['last_media_id'] = int(last_media['pk'])
+                    data['last_media'] = last_media['image_versions2']['candidates'][0]['url']
+                    data['width'] = last_media['image_versions2']['candidates'][0]['width']
+                    data['height'] = last_media['image_versions2']['candidates'][0]['height']
+                    data['location'] = last_media['location']['name']
+                except KeyError:
+                    # for debugging
+                    print('KeyError')
+                data_ = [media for media in medias if media['user_id'] == data['user_id']][0]
+                if data['media_count'] > data_['media_count']:
+                    alert(user=user_, follow=username_follow, data=data, client_fb=client_fb)
+                    # Update info on database
+                    database.update_media(last_media_id=data['last_media_id'], media_count=data['media_count'],
+                                          foreign_id=id_, last_media=data['last_media'], width=data['width'],
+                                          height=data['height'],
+                                          location=data['location'], last_media_id_=data_['last_media_id'])
+            print('Sleeping')
+            sleep(60 * 30)
+    except KeyboardInterrupt:
+        print('Interrupted!')
 
 
 def get_info(api_, user_id):
