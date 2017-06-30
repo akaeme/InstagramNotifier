@@ -2,17 +2,25 @@ import argparse
 import os
 import sys
 import urllib.request
+
 from getpass import getpass
 from time import sleep
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
-from fbchat import Client, logging
+from fbchat import Client
 
 from API.InstagramAPI import InstagramAPI
 from databaseUtils import Database
 
 # from fbchat.models import *
+import logging
+logger = logging.getLogger('instagramNotifier')
+hdlr = logging.FileHandler('instagramNotifier.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr)
+logger.setLevel(logging.INFO)
 
 database = Database('InstagramNotifier.db')
 MESSAGE_HEADER = 'Check out the new %s\'s photo on instagram! \n'
@@ -73,11 +81,13 @@ def alert(user, follow, data, client_fb):
                 message = get_message(message_type='image', source=follow, data=data)
                 client_fb.sendLocalImage(image_path='tmp.jpg', message=message, thread_id=str(user['thread_id']))
                 client_fb.sendMessage(message=MESSAGE_FOOTER, thread_id=str(user['thread_id']))
+                logger.info('User %s notified %s on facebook.', user, str(user['thread_id']))
                 # clean image created
                 os.remove('tmp.jpg')
             else:
                 message = get_message(message_type='no_image', source=follow)
                 client_fb.sendMessage(message=message, thread_id=str(user['thread_id']))
+                logger.info('%s  got notified on facebook.', str(user['thread_id']))
 
 
 def run(api_, user_):
@@ -117,8 +127,9 @@ def run(api_, user_):
                                           foreign_id=id_, last_media=data['last_media'], width=data['width'],
                                           height=data['height'],
                                           location=data['location'], last_media_id_=data_['last_media_id'])
+                    logger.info('Update media for user %s.', data['user_id'])
             print('Sleeping')
-            sleep(60 * 30)
+            sleep(60*30)
     except KeyboardInterrupt:
         print('Interrupted!')
 
@@ -163,7 +174,9 @@ def validate_user(user_, passw, service):
     digest_ = hashes.Hash(hashes.SHA256(), backend=default_backend())
     digest_.update(bytes(passw, 'utf8'))
     if password_hash == str(digest_.finalize().hex()):
+        logger.info('User %s validated on %s', user_, service)
         return True
+    logger.warning('User %s not validated on %s. Hash do not match.', user_, service)
     return False
 
 
@@ -204,6 +217,7 @@ if __name__ == "__main__":
                 digest.update(bytes(password_fb, 'utf8'))
                 fb_hash = digest.finalize().hex()
                 database.insert_user(username=username, password=insta_hash, email=email, password_fb=fb_hash)
+                logger.info('User %s inserted on database.', username)
                 client.logout()
         else:
             print('Invalid username or password. Try again!')
@@ -224,6 +238,7 @@ if __name__ == "__main__":
                 database.insert_media(last_media_id=data['last_media_id'], media_count=data['media_count'],
                                       foreign_id=id_row, last_media=data['last_media'], width=data['width'],
                                       height=data['height'], location=data['location'])
+                logger.info('User %s is now following closely %s.', username, follow_user)
             else:
                 print('You are not following the user with the instagram username: ' + follow_user)
         else:
@@ -247,6 +262,7 @@ if __name__ == "__main__":
             for person in to_notify:
                 id_follow = database.get_from_follows_find(username=username, username_follow=person)[0]
                 database.insert_notify(foreign_id=id_follow, thread_id=notify.uid, thread_type=0, image_flag=1)
+                logger.info('User %s will notify %s about something.', username, notify)
 
     if args['run']:
         if validate_user(user_=username, passw=password, service='instagram'):
