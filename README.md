@@ -3,7 +3,8 @@ Instagram Notifier
 
 Instagram notifier is a script that let you launch one bot to notify you about the new activity of the people that 
 you maybe want to follow closely.
-For now just supports notifications about new photos.
+For now just supports notifications about new photos polling them every 30 minutes. 
+It only notifies the last photo placed, given the time interval.
 
 Main Features:
  - Notifies many sources of information(people on instagram)
