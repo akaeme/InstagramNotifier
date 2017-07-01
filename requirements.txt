@@ -1,3 +1,4 @@
+pyshorteners==0.6.1
 requests-toolbelt==0.7.0
 cryptography==1.7.2
 fbchat==1.0.8

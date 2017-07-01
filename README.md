@@ -17,6 +17,7 @@ InstagramNotifier uses two API's:
  - InstagramAPI, a changed version of https://github.com/ahmdrz/Instagram-API-python in order to support pagination 
  and error control.
  - fbchat, available at https://github.com/carpedm20/fbchat
+ - pyshorteners, available at https://github.com/ellisonleao/pyshorteners
 
 It also uses sqlite3 to save securely some useful data 
 
