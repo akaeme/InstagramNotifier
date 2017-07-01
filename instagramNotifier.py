@@ -1,8 +1,9 @@
 import argparse
+# from fbchat.models import *
+import logging
 import os
 import sys
 import urllib.request
-
 from getpass import getpass
 from time import sleep
 
@@ -13,8 +14,6 @@ from fbchat import Client
 from API.InstagramAPI import InstagramAPI
 from databaseUtils import Database
 
-# from fbchat.models import *
-import logging
 logger = logging.getLogger('instagramNotifier')
 hdlr = logging.FileHandler('instagramNotifier.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -250,7 +249,12 @@ if __name__ == "__main__":
         if validate_user(user_=email, passw=password_fb, service='facebook'):
             client = Client(email=email, password=password_fb, logging_level=logging.CRITICAL)
             notify = input('Let\'s notify (you must know the facebook name of the person ): ')
-            notify = client.searchForUsers(notify)[0]
+            notify = client.searchForUsers(name=notify, limit=10)
+            friends = sorted([x for x in notify if x.is_friend], key=lambda x: x.uid)
+            print('There are many friends with this name: ')
+            print('\n'.join('{} -> name: {}, photo: {}'.format(i, k.name, k.photo) for i, k in enumerate(friends)))
+            io = input('Choose one of them: ')
+            notify = friends[int(io)]
 
             print('This person should receive notifications about whom?')
             follow_ = sorted([f[1] for f in database.get_from_follows(username=username)])
