@@ -108,6 +108,7 @@ def run(api_, user_):
                 api_.getUsernameInfo(str(f_closely))
                 media_results = api_.LastJson
                 data['media_count'] = media_results['user']['media_count']
+                print(data['media_count'])
                 api_.getUserFeed(str(f_closely))
                 media_results = api_.LastJson
                 last_media = media_results['items'][0]
@@ -121,6 +122,7 @@ def run(api_, user_):
                     # for debugging
                     print('KeyError')
                 data_ = [media for media in medias if media['user_id'] == data['user_id']][0]
+                print(data_)
                 if data['media_count'] > data_['media_count']:
                     alert(user=user_, follow=username_follow, data=data, client_fb=client_fb)
                     # Update info on database
@@ -130,7 +132,7 @@ def run(api_, user_):
                                           location=data['location'], last_media_id_=data_['last_media_id'])
                     logger.info('Update media for user %s.', data['user_id'])
             print('Sleeping')
-            sleep(60*30)
+            sleep(120)
     except KeyboardInterrupt:
         print('Interrupted!')
 
