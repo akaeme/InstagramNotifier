@@ -6,11 +6,11 @@ import sys
 import urllib.request
 from getpass import getpass
 from time import sleep
-from pyshorteners import Shortener
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from fbchat import Client
+from pyshorteners import Shortener
 
 from API.InstagramAPI import InstagramAPI
 from databaseUtils import Database
@@ -108,7 +108,6 @@ def run(api_, user_):
                 api_.getUsernameInfo(str(f_closely))
                 media_results = api_.LastJson
                 data['media_count'] = media_results['user']['media_count']
-                print(data['media_count'])
                 api_.getUserFeed(str(f_closely))
                 media_results = api_.LastJson
                 last_media = media_results['items'][0]
@@ -122,8 +121,7 @@ def run(api_, user_):
                     # for debugging
                     print('KeyError')
                 data_ = [media for media in medias if media['user_id'] == data['user_id']][0]
-                print(data_)
-                if data['media_count'] > data_['media_count']:
+                if data['last_media_id'] != data_['last_media_id']:
                     alert(user=user_, follow=username_follow, data=data, client_fb=client_fb)
                     # Update info on database
                     database.update_media(last_media_id=data['last_media_id'], media_count=data['media_count'],
